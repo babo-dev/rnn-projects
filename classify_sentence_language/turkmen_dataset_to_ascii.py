@@ -11,14 +11,14 @@ def process_turkmen_dataset(input_file, output_file):
 
     with open(output_file, 'w', encoding='utf-8') as outfile:
         for sentence in sentences:
-            cleaned_sentence = re.sub(r'\d{1,2}:\d{2} \(.*?\)', '', sentence).strip()
+            cleaned_sentence = re.sub(r'\d{1,2}:\d{2} \(.*?\)', '', sentence).replace('\n', ' ').strip()
             ascii_sentence = unicode_to_ascii(cleaned_sentence)
 
-            if ascii_sentence:
+            if ascii_sentence and len(ascii_sentence.split()) > 3:
                 outfile.write(ascii_sentence + '\n')
 
 
 # any Turkmen dataset that contains non ascii characters like 'ä', 'ö', 'ü', etc.
-input_file = 'data/dataset_ABC_240624.txt'
-output_file = 'data/train/turkmen.txt'
+input_file = 'data/test.txt'
+output_file = 'data/test2.txt'
 process_turkmen_dataset(input_file, output_file)
