@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-MAX_LENGTH = 10
+MAX_LENGTH = 15
 SOS_token = 0
 EOS_token = 1
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")

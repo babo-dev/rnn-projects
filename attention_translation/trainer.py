@@ -105,4 +105,4 @@ if __name__ == "__main__":
     if continue_training:
         load_models(encoder, decoder, checkpoint_path)
 
-    train(train_dataloader, encoder, decoder, checkpoint_path, 20, print_every=1, plot_every=1)
+    train(train_dataloader, encoder, decoder, checkpoint_path, 30, print_every=5, plot_every=5)
