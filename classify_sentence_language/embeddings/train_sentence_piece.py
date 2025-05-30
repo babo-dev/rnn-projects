@@ -15,7 +15,7 @@ def train_sentence_piece(train_dir: str, vocab_size: int = 3000, output_dir: str
 
 if __name__ == '__main__':
     argparser = argparse.ArgumentParser(description='Train SentencePiece model')
-    argparser.add_argument('--train_dir', type=str, required=True, help='Directory containing training text files')
+    argparser.add_argument('--train_dir', type=str, required=True, help='Directory containing utils text files')
     argparser.add_argument('--vocab_size', type=int, default=2000, help='Vocabulary size')
     argparser.add_argument('--output', type=str, default='embeddings/embedding', help='Output model name')
     args = argparser.parse_args()
