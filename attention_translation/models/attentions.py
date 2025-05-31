@@ -24,7 +24,7 @@ class DotProductAttention(nn.Module):
         attention_weights = F.softmax(scores, dim=1)  # Shape: (batch_size, seq_len)
 
         # Compute context vector as a weighted sum of encoder annotations
-        context_vector = torch.bmm(attention_weights.unsqueeze(1), keys).squeeze(1)  # Shape: (batch_size, hidden_dim)
+        context_vector = torch.bmm(attention_weights.unsqueeze(1), keys)  # Shape: (batch_size, 1, hidden_dim)
 
         return context_vector, attention_weights
 

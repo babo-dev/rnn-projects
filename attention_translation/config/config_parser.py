@@ -7,7 +7,7 @@ class TrainingConfig:
     batch_size: int
     epochs: int
     learning_rate: float
-    teacher_forcing_ratio: float
+    # teacher_forcing_ratio: float
 
 
 @dataclass
@@ -18,8 +18,9 @@ class ModelConfig:
 
 @dataclass
 class DataConfig:
+    max_length: int
     train_path: str
-    val_path: str
+    # val_path: str
 
 
 @dataclass
@@ -31,7 +32,7 @@ class MainConfig:
 
 def _dict_to_dataclass(data: dict) -> MainConfig:
     return MainConfig(
-        training=TrainingConfig(**data['utils']),
+        training=TrainingConfig(**data['training']),
         model=ModelConfig(**data['model']),
         data=DataConfig(**data['data'])
     )

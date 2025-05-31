@@ -5,8 +5,8 @@ training:
 
 model:
   hidden_dim: 128
-  num_layers: 2
+  num_layers: 1
 
 data:
-  train_path: "data/train.csv"
-  val_path: "data/val.csv"
+  max_length: 15
+  train_path: "data/processed/tuk_processed.txt"

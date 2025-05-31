@@ -25,7 +25,7 @@ class Seq2SeqDotAttention(nn.Module):
         encoder_outputs, hidden = self.encoder(src)
 
         # First input to the decoder is the <SOS> token
-        x = trg[:, 0]
+        x = trg[:, 0].unsqueeze(1)  # Shape: (batch_size, 1)
 
         for t in range(1, trg_len):
             output, hidden, attn_weights = self.decoder(x, hidden, encoder_outputs)
@@ -35,7 +35,10 @@ class Seq2SeqDotAttention(nn.Module):
             # teacher_force = torch.rand(1) < teacher_forcing_ratio
             teacher_force = t < teacher_forcing_ratio * trg_len  # Gradual teacher forcing
             top1 = output.argmax(1)
-            x = trg[:, t] if teacher_force else top1
+            if teacher_force:
+                x = trg[:, t].unsqueeze(1)  # Teacher forcing: use actual next input
+            else:
+                x = top1.unsqueeze(1)
 
         return outputs, hidden, attentions
 

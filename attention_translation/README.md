@@ -1,3 +1,13 @@
+Trained on just available 3509 turkmen-english sentence pairs
+
+We have DotProductAttention, GeneralAttention, and ConcatAttention(BahdanauAttention) 
+implemented in the `models/attentions.py` file.
+
+It's results on training data for now we have small amount of data: (on colab)
+
+<img src="data/images/attn_translate_bleu068.png" width="720" alt="Evaluation">
+
+
 ### Clean File Architecture
 Below is a new (for me) structured directory layout for a Seq2Seq project with attention mechanisms, 
 suitable for translation tasks. This structure includes directories for data, models, training scripts, 
@@ -15,10 +25,7 @@ seq2seq_attention_project/
 │   ├── attentions.py    # Attention mechanisms (e.g., Bahdanau, Luong)
 │   ├── encoder.py
 │   ├── decoder.py
-│   └── seq2seq.py
-│
-├── utils/
-│   └── utils.py           
+│   └── seq2seq.py       
 │
 ├── config/
 │   ├── __init__.py
@@ -44,6 +51,9 @@ seq2seq_attention_project/
 │   ├── checkpoints/
 │   └── tokenizer/
 │
+├── trainer.py
+├── evaulator.py
+├── utils.py
 ├── requirements.txt
 ├── README.md
 └── .gitignore

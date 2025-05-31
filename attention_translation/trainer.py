@@ -1,9 +1,12 @@
 import time
 import os
-from utils import timeSince, showPlot
+from utils import timeSince
+from config import load_config
 from data.dataset import get_dataloader
-from models.encoder import EncoderRNN
-from models.seq2seq import AttnDecoderRNN
+from models.encoder import EncoderRNN, Encoder
+from models.decoder import Decoder
+from models.attentions import DotProductAttention
+from models.seq2seq import AttnDecoderRNN, Seq2SeqDotAttention
 
 import torch
 import torch.optim as optim
@@ -87,22 +90,80 @@ def train(train_dataloader, encoder, decoder, checkpoint_path, n_epochs, learnin
             plot_losses.append(plot_loss_avg)
             plot_loss_total = 0
 
-    save_models(encoder, decoder, checkpoint_path)
-    showPlot(plot_losses)
+    # save_models(encoder, decoder, checkpoint_path)
+    # showPlot(plot_losses)
 
 
-if __name__ == "__main__":
-    hidden_size = 128
-    batch_size = 32
-    file_path = "data/processed/tuk_processed.txt"
-    checkpoint_path = "saved/checkpoints"
-    continue_training = True
-
+def run_tutorial(hidden_size, batch_size, file_path, checkpoint_path, continue_training=True):
     input_lang, output_lang, train_dataloader = get_dataloader(batch_size, file_path)
 
     encoder = EncoderRNN(input_lang.n_words, hidden_size).to(device)
     decoder = AttnDecoderRNN(hidden_size, output_lang.n_words).to(device)
+
     if continue_training:
         load_models(encoder, decoder, checkpoint_path)
 
-    train(train_dataloader, encoder, decoder, checkpoint_path, 30, print_every=5, plot_every=5)
+    train(train_dataloader, encoder, decoder, checkpoint_path, 5, print_every=1)
+
+
+def train_universal(train_dataloader, model, checkpoint_path, n_epochs=30, learning_rate=0.001, print_every=1):
+    start = time.time()
+    print_loss_total = 0  # Reset every print_every
+    plot_loss_total = 0  # Reset every plot_every
+
+    optimizer_encoder = optim.Adam(model.encoder.parameters(), lr=learning_rate)
+    optimizer_decoder = optim.Adam(model.decoder.parameters(), lr=learning_rate)
+    criterion = nn.CrossEntropyLoss()
+    # criterion = nn.NLLLoss()
+
+    for epoch in range(1, n_epochs + 1):
+        total_loss = 0
+        for data in train_dataloader:
+            input_tensor, target_tensor = data
+
+            optimizer_encoder.zero_grad()
+            optimizer_decoder.zero_grad()
+
+            outputs, _, _ = model(input_tensor, target_tensor)
+            loss = criterion(outputs.view(-1, outputs.size(-1)), target_tensor.view(-1))
+            loss.backward()
+
+            optimizer_encoder.step()
+            optimizer_decoder.step()
+
+            total_loss += loss.item()
+
+        print_loss_total += total_loss / len(train_dataloader)
+        plot_loss_total += total_loss / len(train_dataloader)
+
+        if epoch % print_every == 0:
+            print_loss_avg = print_loss_total / print_every
+            print_loss_total = 0
+            print('%s (%d %d%%) %.4f' % (timeSince(start, epoch / n_epochs),
+                                         epoch, epoch / n_epochs * 100, print_loss_avg))
+
+    save_models(model.encoder, model.decoder, checkpoint_path)
+
+
+def run_universal(hidden_size,  batch_size, file_path, checkpoint_path, continue_training=False):
+    input_lang, output_lang, train_dataloader = get_dataloader(batch_size, file_path)
+
+    attn = DotProductAttention()
+    encoder = Encoder(input_lang.n_words, hidden_size).to(device)
+    decoder = Decoder(hidden_size, output_lang.n_words, attn).to(device)
+    model = Seq2SeqDotAttention(encoder, decoder).to(device)
+
+    if continue_training:
+        load_models(encoder, decoder, checkpoint_path)
+
+    train_universal(train_dataloader, model, checkpoint_path, 5)
+
+
+if __name__ == "__main__":
+    config_path = "config/config.yaml"
+    cfg = load_config(config_path)
+    checkpoint_path = "saved/checkpoints"
+    continue_train = False
+
+    run_universal(cfg.model.hidden_dim, cfg.training.batch_size, cfg.data.train_path, checkpoint_path, continue_train)
+    # run_tutorial(cfg.model.hidden_dim, cfg.training.batch_size, cfg.data.train_path, checkpoint_path, continue_train)
